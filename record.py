@@ -25,7 +25,7 @@ every other night.
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.
 """
-import getopt, sys, os
+import getopt, sys, os, time
 import urllib, urllib2
 from BeautifulSoup import BeautifulSoup
 
@@ -113,26 +113,36 @@ class HomebaseRecord:
         """Return a dict with the different available channels."""
         pass
 
+    def get_time(self, timestr):
+        """Convert a time string from homebase to a standard time tuple."""
+        return time.strptime(timestr, '%Y%m%d%H%M%S')
+
     def print_program(self, program):
         """Return a human-readable string of a program."""
-        return u"%s (%s) [%s-%s]" % (program['title'], program['channel'],
-                                    program['start'], program['end'])
+        start = time.strftime('%Y-%m-%d %H:%M', self.get_time(program['start']))
+        end   = time.strftime('%H:%M', self.get_time(program['end']))
+        return u"%s @ %s [%s - %s]" % (program['title'], program['channel'],
+                                     start, end)
 
 def main(args):
-    #for p in get_programs():
-    #    print "%20s %s" % (p['href'], p['title'])
+    # TODO: development, reading in the programstemp.py file with a dump of
+    # returned results instead of asking homebase.no each time.
     h = HomebaseRecord()
-    programs = h.get_programs(1)
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if serie['title'] == program['title']:
-                print "Recording %s - %s" % (program['title'], program['id'])
-                h.record_program(program['id'])
-    #print h.record_program('20110703/tv2/20110703173500-20110703180000')
+    #programs = h.get_programs(1)
+    import programstemp
+    programs = programstemp.p
     for p in programs:
         print h.print_program(p)
+    #for serie in config.series:
+    #    for program in programs:
+    #        if serie.has_key('channel') and serie['channel'] != program['channel']:
+    #            continue
+    #        if serie['title'] == program['title']:
+    #            print "Recording %s - %s" % (program['title'], program['id'])
+    #            h.record_program(program['id'])
+    ##print h.record_program('20110703/tv2/20110703173500-20110703180000')
+    #for p in programs:
+    #    print h.print_program(p)
 
 if __name__ == '__main__':
     main(sys.argv)
