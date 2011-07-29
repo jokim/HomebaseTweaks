@@ -35,6 +35,7 @@ class HomebaseRecord:
     def __init__(self):
         # TODO: add logon credentials as parameters to init?
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+        self.opener.addheaders = [('User-Agent', 'HomebaseTweaks - https://github.com/jokim/HomebaseTweaks')]
         urllib2.install_opener(self.opener)
         if not self.logon():
             raise Exception("Could not log on")
