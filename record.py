@@ -27,6 +27,7 @@ put in the file `config.py`.
 """
 import getopt, sys, os, time
 import urllib, urllib2
+from math import ceil
 from BeautifulSoup import BeautifulSoup
 
 import config
@@ -75,12 +76,20 @@ class HomebaseRecord:
         print "Failed: %s" % data
         return False
 
-    def get_programs(self, daysfromnow=0):
-        """Return a list of the shown programs on a given day."""
-        # ts2 is timestamp to get the next few (six?) hours with shows
-        target = 'ts=0'# %d' % daysfromnow
+    def get_programs(self, days=1):
+        """Return a list of future programs.
+        @param days The number of days we should fetch programs from
+        """
+        # Since each call at epg.php only returns 5.5 hours with shows, we need
+        # to loop it 4.36 loops per day.
+        #
+        # ts  defines the number of days from today (0)
+        # ts2 is timestamp to start from
+        target = 'ts=0'
         ret = []
-        for i in range((daysfromnow + 1) * 5): # each run views 5.5 hours
+        sys.stdout.write("Getting programs")
+        for i in range(int(ceil(days * 4.4))):
+            sys.stdout.write('.')
             # TODO: should check hour of day, as when ts=0 you only get the rest
             # of the day - not necessary to loop for 24 hours then, but works
             url = urllib2.urlopen('https://min.homebase.no/epg/epg.php?%s' % target)
@@ -95,7 +104,8 @@ class HomebaseRecord:
                 meta['title'] = prog.span.span.a.string
                 ret.append(meta)
             for a in soup.findAll('a', {'class': 'nextDay'}):
-                target = a['href'].split('?')[1]
+                target = a['href'].split('?')[1] # = ts2=XXXXXX
+        sys.stdout.write('\n')
         return tuple(ret)
 
     def parse_id(self, tag):
@@ -126,18 +136,23 @@ class HomebaseRecord:
 
 def main(args):
     h = HomebaseRecord()
+
+    # TODO: validate the config? E.g. check that the defined 'channel's exists?
+
     # TODO: development, reading in the programstemp.py file with a dump of
     # returned results instead of asking homebase.no each time.
     programs = h.get_programs(1)
     #import programstemp
     #programs = programstemp.p
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if serie['title'] == program['title']:
-                print "Recording: %s" % h.print_program(program)
-                h.record_program(program['id'])
+    #print programs
+
+    #for serie in config.series:
+    #    for program in programs:
+    #        if serie.has_key('channel') and serie['channel'] != program['channel']:
+    #            continue
+    #        if serie['title'] == program['title']:
+    #            print "Recording: %s" % h.print_program(program)
+    #            #h.record_program(program['id'])
 
 if __name__ == '__main__':
     main(sys.argv)
