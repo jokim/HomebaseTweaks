@@ -121,7 +121,7 @@ class HomebaseRecord:
         """Return a human-readable string of a program."""
         start = time.strftime('%Y-%m-%d %H:%M', self.get_time(program['start']))
         end   = time.strftime('%H:%M', self.get_time(program['end']))
-        return u"%s @ %s [%s - %s]" % (program['title'], program['channel'],
+        return u"%s @ %s (%s-%s)" % (program['title'], program['channel'],
                                      start, end)
 
 def main(args):
