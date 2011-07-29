@@ -130,9 +130,6 @@ def main(args):
             if serie['title'] == program['title']:
                 print "Recording %s - %s" % (program['title'], program['id'])
                 h.record_program(program['id'])
-    #print h.record_program('20110703/tv2/20110703173500-20110703180000')
-    for p in programs:
-        print h.print_program(p)
 
 if __name__ == '__main__':
     main(sys.argv)
