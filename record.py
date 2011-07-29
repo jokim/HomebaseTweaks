@@ -121,7 +121,13 @@ class HomebaseRecord:
 
     def get_channels(self):
         """Return a dict with the different available channels."""
-        pass
+        url = urllib2.urlopen('https://min.homebase.no/epg/epg.php')
+        soup = BeautifulSoup(''.join(url.readlines()))
+        channels = {}
+        for channel in soup.findAll('div', {'class': 'channelName'}):
+            name = channel['id'][1:]
+            channels[name] = channel.a.string
+        return channels
 
     def get_time(self, timestr):
         """Convert a time string from homebase to a standard time tuple."""
@@ -144,7 +150,6 @@ def main(args):
     programs = h.get_programs(1)
     #import programstemp
     #programs = programstemp.p
-    #print programs
 
     #for serie in config.series:
     #    for program in programs:
