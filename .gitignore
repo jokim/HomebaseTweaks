@@ -1,0 +1,5 @@
+*~
+*.pyc
+.*.swp
+# The user's config file:
+config.py
