@@ -125,24 +125,19 @@ class HomebaseRecord:
                                      start, end)
 
 def main(args):
+    h = HomebaseRecord()
     # TODO: development, reading in the programstemp.py file with a dump of
     # returned results instead of asking homebase.no each time.
-    h = HomebaseRecord()
-    #programs = h.get_programs(1)
-    import programstemp
-    programs = programstemp.p
-    for p in programs:
-        print h.print_program(p)
-    #for serie in config.series:
-    #    for program in programs:
-    #        if serie.has_key('channel') and serie['channel'] != program['channel']:
-    #            continue
-    #        if serie['title'] == program['title']:
-    #            print "Recording %s - %s" % (program['title'], program['id'])
-    #            h.record_program(program['id'])
-    ##print h.record_program('20110703/tv2/20110703173500-20110703180000')
-    #for p in programs:
-    #    print h.print_program(p)
+    programs = h.get_programs(1)
+    #import programstemp
+    #programs = programstemp.p
+    for serie in config.series:
+        for program in programs:
+            if serie.has_key('channel') and serie['channel'] != program['channel']:
+                continue
+            if serie['title'] == program['title']:
+                print "Recording: %s" % h.print_program(program)
+                h.record_program(program['id'])
 
 if __name__ == '__main__':
     main(sys.argv)
