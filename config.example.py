@@ -1,4 +1,6 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
+#
 # Copyright 2011 Joakim Hovlandsvåg <joakim.hovlandsvag@gmail.com>
 #
 # This file is part of HomebaseTweaks.

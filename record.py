@@ -1,4 +1,6 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
+#
 # Copyright 2011 Joakim Hovlandsvåg <joakim.hovlandsvag@gmail.com>
 #
 # This file is part of HomebaseTweaks.
@@ -119,7 +121,7 @@ class HomebaseRecord:
 def main(args):
     #for p in get_programs():
     #    print "%20s %s" % (p['href'], p['title'])
-    h = Homebase()
+    h = HomebaseRecord()
     programs = h.get_programs(1)
     for serie in config.series:
         for program in programs:
