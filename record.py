@@ -17,7 +17,8 @@
 # along with HomebaseTweaks. If not, see <http://www.gnu.org/licenses/>.
 """
 Script for automating the recording of programs at homebase.no, since they don't
-support automatic recording of series.
+support automatic recording of series. It could for instance be run in a cronjob
+every other night.
 
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.

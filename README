@@ -1,0 +1,22 @@
+HomebaseTweaks is a small project for adding missing functionality from
+homebase.no, e.g. automatic record your beloved series instead of having to
+record each program every weak.
+
+Requirements
+------------
+
+* Python - http://python.org
+
+  2.7.1 were used during development, but others would hopefully work as well.
+
+* BeautifulSoup - http://www.crummy.com/software/BeautifulSoup/
+
+  3.2.0 were used during development, but others would hopefully work as well.
+
+
+The code is GPLv3, which means you're allowed to freely copy and modify it for
+your needs, as long as you share it with the same licence. Please contact me if
+you have any questions:
+
+    Joakim Hovlandsvåg  < joakim.hovlandsvag [krøll] gmail.com >
+
