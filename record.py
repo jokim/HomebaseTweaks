@@ -25,12 +25,16 @@ every other night.
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.
 """
-import getopt, sys, os, time
+import sys, os, time, optparse
 import urllib, urllib2
 from math import ceil
 from BeautifulSoup import BeautifulSoup
 
-import config
+try:
+    import config
+except ImportError:
+    print "Config not created (config.py)."
+    sys.exit(1)
 
 class HomebaseRecord:
     """Class for handling the record communication with homebase."""
@@ -40,27 +44,28 @@ class HomebaseRecord:
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
         self.opener.addheaders = [('User-Agent', 'HomebaseTweaks - https://github.com/jokim/HomebaseTweaks')]
         urllib2.install_opener(self.opener)
-        if not self.logon():
-            raise Exception("Could not log on")
+        self.loggedon = False
 
     def logon(self):
         """Logs on homebase and stores the session cookie."""
-        # TODO: do not store the password here!
-        username = config.username
-        password = config.password
+        if self.loggedon:
+            return
         params = urllib.urlencode({'action': 'login', 
-                'username': username,
-                'password': password,
+                'username': config.username,
+                'password': config.password,
                 'savelogin': 'save',})
         page = self.opener.open('https://min.homebase.no/login.php', params)
         # Correctly logged on:
         #   https://min.homebase.no/index.php?userLoggedIn=1 when
         # Failed logon:
         #   https://min.homebase.no/index.php?page=loginform&e=p&username=USERNAME&gotopage=
-        return page.url.find('userLoggedIn=1') > 0
+        if page.url.find('userLoggedIn=1') <= 0:
+            raise Exception('Could not log on (username=%s)' % config.username)
+        self.loggedon = True
 
     def record_program(self, id):
         """Set a given program to be recorded."""
+        self.logon()
         url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php?action=add&FR=%s' % id)
         # Sample error messages:
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Du m\xe5 logge inn f\xf8rst.']
@@ -129,6 +134,13 @@ class HomebaseRecord:
             channels[name] = channel.a.string
         return channels
 
+    def print_channels(self, *args):
+        channels = self.get_channels()
+        for channel in sorted(channels):
+            print "%20s: %s" % (channel, channels[channel])
+        # TODO: remove this when model and presenter has been split
+        sys.exit()
+
     def get_time(self, timestr):
         """Convert a time string from homebase to a standard time tuple."""
         return time.strptime(timestr, '%Y%m%d%H%M%S')
@@ -141,9 +153,16 @@ class HomebaseRecord:
                                      start, end)
 
 def main(args):
-    h = HomebaseRecord()
-
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
+    h = HomebaseRecord()
+    parser = optparse.OptionParser()
+    parser.add_option('-v', '--verbose',
+                      action='store_true', default=False, dest='verbose',
+                      help="Be more verbose?")
+    parser.add_option('--list-channels', 
+                      action='callback', callback=h.print_channels,
+                      help="list the available channels")
+    options, remainder = parser.parse_args()
 
     # TODO: development, reading in the programstemp.py file with a dump of
     # returned results instead of asking homebase.no each time.
