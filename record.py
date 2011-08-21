@@ -25,7 +25,7 @@ every other night.
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.
 """
-import sys, os, time, optparse
+import sys, os, time, argparse
 import urllib, urllib2
 from math import ceil
 from BeautifulSoup import BeautifulSoup
@@ -134,12 +134,12 @@ class HomebaseRecord:
             channels[name] = channel.a.string
         return channels
 
-    def print_channels(self, *args):
+    def print_channels(self, *args, **kwargs):
+        print "args: %s" % (args,)
+        print "kwargs: %s" % (kwargs,)
         channels = self.get_channels()
         for channel in sorted(channels):
             print "%20s: %s" % (channel, channels[channel])
-        # TODO: remove this when model and presenter has been split
-        sys.exit()
 
     def get_time(self, timestr):
         """Convert a time string from homebase to a standard time tuple."""
@@ -152,17 +152,25 @@ class HomebaseRecord:
         return u"%s @ %s (%s-%s)" % (program['title'], program['channel'],
                                      start, end)
 
+class FooAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        print('%r %r %r' % (namespace, values, option_string))
+
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
     h = HomebaseRecord()
-    parser = optparse.OptionParser()
-    parser.add_option('-v', '--verbose',
+    parser = argparse.ArgumentParser(description="Set programs/series to record at homebase.no.")
+    parser.add_argument('-v', '--verbose',
                       action='store_true', default=False, dest='verbose',
                       help="Be more verbose?")
-    parser.add_option('--list-channels', 
-                      action='callback', callback=h.print_channels,
-                      help="list the available channels")
-    options, remainder = parser.parse_args()
+    parser.add_argument('--list-channels', action='store_true', 
+                        help="list the available channels")
+    args = parser.parse_args()
+    print(args)
+
+    if args.list_channels:
+        h.print_channels()
+        sys.exit()
 
     # TODO: development, reading in the programstemp.py file with a dump of
     # returned results instead of asking homebase.no each time.
