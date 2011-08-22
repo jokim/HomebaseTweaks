@@ -134,9 +134,7 @@ class HomebaseRecord:
             channels[name] = channel.a.string
         return channels
 
-    def print_channels(self, *args, **kwargs):
-        print "args: %s" % (args,)
-        print "kwargs: %s" % (kwargs,)
+    def print_channels(self):
         channels = self.get_channels()
         for channel in sorted(channels):
             print "%20s: %s" % (channel, channels[channel])
@@ -152,21 +150,16 @@ class HomebaseRecord:
         return u"%s @ %s (%s-%s)" % (program['title'], program['channel'],
                                      start, end)
 
-class FooAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        print('%r %r %r' % (namespace, values, option_string))
-
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
     h = HomebaseRecord()
     parser = argparse.ArgumentParser(description="Set programs/series to record at homebase.no.")
     parser.add_argument('-v', '--verbose',
-                      action='store_true', default=False, dest='verbose',
+                      action='store_true', dest='verbose',
                       help="Be more verbose?")
     parser.add_argument('--list-channels', action='store_true', 
-                        help="list the available channels")
+                        help="list the available channels and exit")
     args = parser.parse_args()
-    print(args)
 
     if args.list_channels:
         h.print_channels()
