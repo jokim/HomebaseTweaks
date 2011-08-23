@@ -105,8 +105,8 @@ class HomebaseRecord:
                 if not prog.span.span.a['href']:
                     continue
                 # e.g: 20110629/nrktv1/20110629204500-20110629205500
-                meta = self.parse_id(prog.span.span.a['href'])
-                meta['title'] = prog.span.span.a.string
+                meta = self.parse_id(unicode(prog.span.span.a['href']))
+                meta['title'] = unicode(prog.span.span.a.string)
                 ret.append(meta)
             for a in soup.findAll('a', {'class': 'nextDay'}):
                 target = a['href'].split('?')[1] # = ts2=XXXXXX
@@ -130,14 +130,15 @@ class HomebaseRecord:
         soup = BeautifulSoup(''.join(url.readlines()))
         channels = {}
         for channel in soup.findAll('div', {'class': 'channelName'}):
-            name = channel['id'][1:]
-            channels[name] = channel.a.string
+            name = unicode(channel['id'][1:])
+            channels[name] = unicode(channel.a.string)
         return channels
 
     def print_channels(self):
         channels = self.get_channels()
         for channel in sorted(channels):
-            print "%20s: %s" % (channel, channels[channel])
+            print "%20s: %s" % (channel.encode('utf8'),
+                                channels[channel].encode('utf8'))
 
     def get_time(self, timestr):
         """Convert a time string from homebase to a standard time tuple."""
@@ -147,13 +148,14 @@ class HomebaseRecord:
         """Return a human-readable string of a program."""
         start = time.strftime('%Y-%m-%d %H:%M', self.get_time(program['start']))
         end   = time.strftime('%H:%M', self.get_time(program['end']))
-        return u"%s @ %s (%s-%s)" % (program['title'], program['channel'],
-                                     start, end)
+        return u"%s @ %s (%s-%s)" % (program['title'],
+                                    program['channel'],
+                                    start, end)
 
     def print_programs(self):
         programs = self.get_programs()
         for prog in sorted(programs, key=lambda x: x['title']):
-            print self.print_program(prog)
+            print self.print_program(prog).encode('utf8')
 
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
