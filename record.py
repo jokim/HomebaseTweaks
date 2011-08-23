@@ -152,9 +152,8 @@ class HomebaseRecord:
 
     def print_programs(self):
         programs = self.get_programs()
-        for prog in programs:
+        for prog in sorted(programs, key=lambda x: x['title']):
             print self.print_program(prog)
-
 
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
