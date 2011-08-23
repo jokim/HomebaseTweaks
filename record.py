@@ -92,9 +92,9 @@ class HomebaseRecord:
         # ts2 is timestamp to start from
         target = 'ts=0'
         ret = []
-        sys.stdout.write("Getting programs")
+        print "Getting programs",
         for i in range(int(ceil(days * 4.4))):
-            sys.stdout.write('.')
+            print '.',
             # TODO: should check hour of day, as when ts=0 you only get the rest
             # of the day - not necessary to loop for 24 hours then, but works
             url = urllib2.urlopen('https://min.homebase.no/epg/epg.php?%s' % target)
@@ -110,7 +110,7 @@ class HomebaseRecord:
                 ret.append(meta)
             for a in soup.findAll('a', {'class': 'nextDay'}):
                 target = a['href'].split('?')[1] # = ts2=XXXXXX
-        sys.stdout.write('\n')
+        print
         return tuple(ret)
 
     def parse_id(self, tag):
@@ -150,6 +150,12 @@ class HomebaseRecord:
         return u"%s @ %s (%s-%s)" % (program['title'], program['channel'],
                                      start, end)
 
+    def print_programs(self):
+        programs = self.get_programs()
+        for prog in programs:
+            print self.print_program(prog)
+
+
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
     h = HomebaseRecord()
@@ -157,12 +163,28 @@ def main(args):
     parser.add_argument('-v', '--verbose',
                       action='store_true', dest='verbose',
                       help="Be more verbose?")
+
+    # TODO: make this work:
+    parser.add_argument('--days', type=int, default=7,
+                        help="set the number of days to check programs")
+
+    # TODO: add argument for setting config file
+    # TODO: add support for "already recorded"-file, where all the programs set
+    #       to be recorded are put. Those are not set to be recorded anymore.
+    #       This is to avoid that programs deleted from the record list are put
+    #       back in again later on.
+
     parser.add_argument('--list-channels', action='store_true', 
                         help="list the available channels and exit")
+    parser.add_argument('--list-programs', action='store_true', 
+                        help="list the available programs and exit")
     args = parser.parse_args()
 
     if args.list_channels:
         h.print_channels()
+        sys.exit()
+    if args.list_programs:
+        h.print_programs()
         sys.exit()
 
     # TODO: development, reading in the programstemp.py file with a dump of
@@ -171,13 +193,13 @@ def main(args):
     #import programstemp
     #programs = programstemp.p
 
-    #for serie in config.series:
-    #    for program in programs:
-    #        if serie.has_key('channel') and serie['channel'] != program['channel']:
-    #            continue
-    #        if serie['title'] == program['title']:
-    #            print "Recording: %s" % h.print_program(program)
-    #            #h.record_program(program['id'])
+    for serie in config.series:
+        for program in programs:
+            if serie.has_key('channel') and serie['channel'] != program['channel']:
+                continue
+            if serie['title'] == program['title']:
+                print "Recording: %s" % h.print_program(program)
+                h.record_program(program['id'])
 
 if __name__ == '__main__':
     main(sys.argv)
