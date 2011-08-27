@@ -152,8 +152,8 @@ class HomebaseRecord:
                                     program['channel'],
                                     start, end)
 
-    def print_programs(self):
-        programs = self.get_programs()
+    def print_programs(self, days=1):
+        programs = self.get_programs(days=days)
         for prog in sorted(programs, key=lambda x: x['title']):
             print self.print_program(prog).encode('utf8')
 
@@ -166,7 +166,7 @@ def main(args):
                       help="Be more verbose?")
 
     # TODO: make this work:
-    parser.add_argument('--days', type=int, default=7,
+    parser.add_argument('--days', type=int, default=1,
                         help="set the number of days to check programs")
 
     # TODO: add argument for setting config file
@@ -185,12 +185,12 @@ def main(args):
         h.print_channels()
         sys.exit()
     if args.list_programs:
-        h.print_programs()
+        h.print_programs(args.days)
         sys.exit()
 
     # TODO: development, reading in the programstemp.py file with a dump of
     # returned results instead of asking homebase.no each time.
-    programs = h.get_programs(1)
+    programs = h.get_programs(args.days)
     #import programstemp
     #programs = programstemp.p
 
