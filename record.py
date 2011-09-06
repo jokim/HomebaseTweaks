@@ -39,6 +39,8 @@ except ImportError:
 class HomebaseRecord:
     """Class for handling the record communication with homebase."""
 
+    debug = 0
+
     def __init__(self):
         # TODO: add logon credentials as parameters to init?
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
@@ -76,6 +78,8 @@ class HomebaseRecord:
         # ['Programmet er blitt satt til opptak.']
         data = url.readlines()
         url.close()
+        if self.debug:
+            print "DEBUG: returned answer: %s" % data
         if data == ['Programmet er blitt satt til opptak.']:
             return True
         print "Failed: %s" % data
@@ -164,8 +168,8 @@ def main(args):
     parser.add_argument('-v', '--verbose',
                       action='store_true', dest='verbose',
                       help="Be more verbose?")
-
-    # TODO: make this work:
+    parser.add_argument('--debug', type=int, default=0,
+                      help="Print debug info (internal use)")
     parser.add_argument('--days', type=int, default=1,
                         help="set the number of days to check programs")
 
@@ -180,6 +184,8 @@ def main(args):
     parser.add_argument('--list-programs', action='store_true', 
                         help="list the available programs and exit")
     args = parser.parse_args()
+
+    h.debug = args.debug
 
     if args.list_channels:
         h.print_channels()
