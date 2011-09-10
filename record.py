@@ -25,10 +25,18 @@ every other night.
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.
 """
-import sys, os, time, argparse
+import sys, os, time
+
 import urllib, urllib2
 from math import ceil
 from BeautifulSoup import BeautifulSoup
+
+try:
+    import arparse
+    has_argparse = True
+except ImportError:
+    has_argparse = False
+
 
 try:
     import config
@@ -208,5 +216,41 @@ def main(args):
                 print "Recording: %s" % h.print_program(program)
                 h.record_program(program['id'])
 
+def main_deprecated(args):
+    """The deprecated version of main, if argparse can't be imported. Supports
+    only some standard behaviour."""
+    print "in deprecated main version"
+    debug = 0
+    h = HomebaseRecord()
+    if '-h' in args or '--help' in args:
+        print """Options: --list-programs or --list-channels
+
+        Install python-argparse to make full use of this program.
+        
+        """
+        sys.exit()
+
+    if '--debug' in args:
+        debug = 1
+
+    if '--list-programs' in args:
+        h.print_programs()
+        sys.exit()
+    if '--list-channels' in args:
+        h.print_channels()
+        sys.exit()
+
+    programs = h.get_programs()
+    for serie in config.series:
+        for program in programs:
+            if serie.has_key('channel') and serie['channel'] != program['channel']:
+                continue
+            if serie['title'] == program['title']:
+                print "Recording: %s" % h.print_program(program)
+                h.record_program(program['id'])
+
 if __name__ == '__main__':
-    main(sys.argv)
+    if has_argparse:
+        main(sys.argv)
+    else:
+        main_deprecated(sys.argv)
