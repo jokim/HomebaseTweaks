@@ -231,7 +231,7 @@ def main_deprecated(args):
         sys.exit()
 
     if '--debug' in args:
-        debug = 1
+        h.debug = 1
 
     if '--list-programs' in args:
         h.print_programs()
