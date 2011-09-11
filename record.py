@@ -135,7 +135,8 @@ class HomebaseRecord:
         url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
         soup = BeautifulSoup(''.join(url.readlines()))
         for program in soup.findAll('input', {'type': 'hidden', 'name': 'pid[]'}):
-            print "alread recorded: %s" % program['value']
+            if self.debug >= 1:
+                print "Getting already recorded: %s" % program['value']
             self.already_recorded.append(program['value'])
 
     def parse_id(self, tag):
@@ -215,16 +216,17 @@ def main(args):
         h.print_programs(args.days)
         sys.exit()
 
-    # TODO: development, reading in the programstemp.py file with a dump of
-    # returned results instead of asking homebase.no each time.
+    h.get_record_list()
+    recorded = h.already_recorded
     programs = h.get_programs(args.days)
-    #import programstemp
-    #programs = programstemp.p
 
     for serie in config.series:
         for program in programs:
             if serie.has_key('channel') and serie['channel'] != program['channel']:
                 continue
+            if program['id'] in recorded:
+                print "Already recorded: %s" % h.print_program(program)
+                continue # already recorded
             if serie['title'] == program['title']:
                 print "Recording: %s" % h.print_program(program)
                 h.record_program(program['id'])
@@ -254,11 +256,15 @@ def main_deprecated(args):
         sys.exit()
 
     h.get_record_list()
+    recorded = h.already_recorded
     programs = h.get_programs()
     for serie in config.series:
         for program in programs:
             if serie.has_key('channel') and serie['channel'] != program['channel']:
                 continue
+            if program['id'] in recorded:
+                print "Already recorded: %s" % h.print_program(program)
+                continue # already recorded
             if serie['title'] == program['title']:
                 print "Recording: %s" % h.print_program(program)
                 h.record_program(program['id'])
