@@ -94,10 +94,12 @@ class HomebaseRecord:
         print "Failed: %s" % data
         return False
 
-    def get_programs(self, days=1):
+    def get_programs(self, days=None):
         """Return a list of future programs.
         @param days The number of days we should fetch programs from
         """
+        if not days:
+            days = getattr(config, 'days', 1)
         # Since each call at epg.php only returns 5.5 hours with shows, we need
         # to loop it 4.36 loops per day.
         #
@@ -178,7 +180,7 @@ class HomebaseRecord:
                                     program['channel'],
                                     start, end)
 
-    def print_programs(self, days=1):
+    def print_programs(self, days=None):
         programs = self.get_programs(days=days)
         for prog in sorted(programs, key=lambda x: x['title']):
             print self.print_program(prog).encode('utf8')
