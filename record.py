@@ -194,7 +194,7 @@ def main(args):
                       help="Be more verbose?")
     parser.add_argument('--debug', type=int, default=0,
                       help="Print debug info (internal use)")
-    parser.add_argument('--days', type=float, default=1,
+    parser.add_argument('--days', type=float,
                         help="set the number of days to check programs")
 
     # TODO: add argument for setting config file
