@@ -25,6 +25,9 @@ Example configuration for HomebaseTweaks. Make a copy of this to config.py.
 username = 'username'
 password = 'password'
 
+# The default number of days to get the programs from
+days = 1.0
+
 # Selectors for recording series.
 # If any element in this list matches a program, it will be set to record.
 series = (
