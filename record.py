@@ -76,7 +76,8 @@ class HomebaseRecord:
     def record_program(self, id):
         """Set a given program to be recorded."""
         self.logon()
-        url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php?action=add&FR=%s' % id)
+        url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php',
+                              urllib.urlencode({'action': 'add', 'FR': id}))
         # Sample error messages:
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Du m\xe5 logge inn f\xf8rst.']
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Opptak p\xe5 denne kanalen krever abonnement. Du kan kj\xf8pe et PVR-produkt p\xe5 homebase.no']
