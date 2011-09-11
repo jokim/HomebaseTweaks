@@ -32,7 +32,7 @@ from math import ceil
 from BeautifulSoup import BeautifulSoup
 
 try:
-    import arparse
+    import argparse
     has_argparse = True
 except ImportError:
     has_argparse = False
