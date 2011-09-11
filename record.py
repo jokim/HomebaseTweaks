@@ -126,6 +126,18 @@ class HomebaseRecord:
         print
         return tuple(ret)
 
+    def get_record_list(self):
+        """Get the list from homebase.no of the programs that is already
+        recorded or set to be recorded."""
+        if not hasattr(self, 'already_recorded'):
+            self.already_recorded = list()
+        self.logon()
+        url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
+        soup = BeautifulSoup(''.join(url.readlines()))
+        for program in soup.findAll('input', {'type': 'hidden', 'name': 'pid[]'}):
+            print "alread recorded: %s" % program['value']
+            self.already_recorded.append(program['value'])
+
     def parse_id(self, tag):
         """Parse an tag into its elements."""
         date, channel, time = tag.split('/')
@@ -241,6 +253,7 @@ def main_deprecated(args):
         h.print_channels()
         sys.exit()
 
+    h.get_record_list()
     programs = h.get_programs()
     for serie in config.series:
         for program in programs:
