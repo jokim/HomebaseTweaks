@@ -103,11 +103,10 @@ class HomebaseRecord:
         #
         # ts  defines the number of days from today (0)
         # ts2 is timestamp to start from
+        logging.info("Getting programs for %s days (%d calls)", days, int(ceil(days*4.4)))
         target = 'ts=0'
         ret = []
-        print "Getting programs",
         for i in range(int(ceil(days * 4.4))):
-            print '.',
             # TODO: should check hour of day, as when ts=0 you only get the rest
             # of the day - not necessary to loop for 24 hours then, but works
             url = urllib2.urlopen('https://min.homebase.no/epg/epg.php?%s' % target)
@@ -123,7 +122,6 @@ class HomebaseRecord:
                 ret.append(meta)
             for a in soup.findAll('a', {'class': 'nextDay'}):
                 target = a['href'].split('?')[1] # = ts2=XXXXXX
-        print
         return tuple(ret)
 
     def get_record_list(self):
@@ -192,7 +190,7 @@ def main(args):
                       action='store_true', dest='verbose',
                       help="Be more verbose?")
     parser.add_argument('--debug', type=int, default=0,
-                      help="Print debug info (internal use)")
+                      help="Print debug info, 1 gives INFO, 2+ gives DEBUG level")
     parser.add_argument('--days', type=float,
                         help="set the number of days to check programs")
     parser.add_argument('--list-channels', action='store_true', 
@@ -231,16 +229,15 @@ def main(args):
             if serie.has_key('channel') and serie['channel'] != program['channel']:
                 continue
             if program['id'] in recorded:
-                print "Already recorded: %s" % h.print_program(program)
+                logging.info("Already recorded: %s", h.print_program(program))
                 continue # already recorded
             if serie['title'] == program['title']:
-                print "Recording: %s" % h.print_program(program)
+                logging.info("Recording: %s", h.print_program(program))
                 h.record_program(program['id'])
 
 def main_deprecated(args):
     """The deprecated version of main, if argparse can't be imported. Supports
     only some standard behaviour."""
-    print "in deprecated main version"
     if '-h' in args or '--help' in args:
         print """Options: --list-programs or --list-channels
 
@@ -275,14 +272,15 @@ def main_deprecated(args):
             if serie.has_key('channel') and serie['channel'] != program['channel']:
                 continue
             if program['id'] in recorded:
-                print "Already recorded: %s" % h.print_program(program)
+                logging.info("Already recorded: %s", h.print_program(program))
                 continue # already recorded
             if serie['title'] == program['title']:
-                print "Recording: %s" % h.print_program(program)
+                logging.info("Recording: %s", h.print_program(program))
                 h.record_program(program['id'])
 
 if __name__ == '__main__':
     if has_argparse:
         main(sys.argv)
     else:
+        print "Missing argparse module, using deprecated main version"
         main_deprecated(sys.argv)
