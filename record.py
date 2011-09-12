@@ -46,9 +46,6 @@ except ImportError:
 
 class HomebaseRecord:
     """Class for handling the record communication with homebase."""
-
-    debug = 0
-
     def __init__(self):
         # TODO: add logon credentials as parameters to init?
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
@@ -141,8 +138,7 @@ class HomebaseRecord:
         url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
         soup = BeautifulSoup(''.join(url.readlines()))
         for program in soup.findAll('input', {'type': 'hidden', 'name': 'pid[]'}):
-            if self.debug >= 1:
-                print "Getting already recorded: %s" % program['value']
+            logging.debug("Getting already recorded: %s", program['value'])
             self.already_recorded.append(program['value'])
 
     def parse_id(self, tag):
@@ -245,8 +241,6 @@ def main_deprecated(args):
     """The deprecated version of main, if argparse can't be imported. Supports
     only some standard behaviour."""
     print "in deprecated main version"
-    debug = 0
-    h = HomebaseRecord()
     if '-h' in args or '--help' in args:
         print """Options: --list-programs or --list-channels
 
@@ -255,9 +249,17 @@ def main_deprecated(args):
         """
         sys.exit()
 
-    if '--debug' in args:
-        h.debug = 1
+    debug = 0
+    for arg in args:
+        if arg == '--debug':
+            debug += 1
 
+    if debug >= 2:
+        logging.basicConfig(level=logging.DEBUG)
+    elif debug >= 1:
+        logging.basicConfig(level=logging.INFO)
+
+    h = HomebaseRecord()
     if '--list-programs' in args:
         h.print_programs()
         sys.exit()
