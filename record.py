@@ -25,7 +25,7 @@ every other night.
 Recorder settings, e.g. logon credentials and what programs to record, should be
 put in the file `config.py`.
 """
-import sys, os, time
+import sys, os, time, logging
 
 import urllib, urllib2
 from math import ceil
@@ -60,6 +60,7 @@ class HomebaseRecord:
         """Logs on homebase and stores the session cookie."""
         if self.loggedon:
             return
+        logging.debug('Logging on as: %s', config.username)
         params = urllib.urlencode({'action': 'login', 
                 'username': config.username,
                 'password': config.password,
@@ -76,6 +77,7 @@ class HomebaseRecord:
     def record_program(self, id):
         """Set a given program to be recorded."""
         self.logon()
+        logging.debug('Recording %s', id)
         url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php',
                               urllib.urlencode({'action': 'add', 'FR': id}))
         # Sample error messages:
@@ -87,11 +89,10 @@ class HomebaseRecord:
         # ['Programmet er blitt satt til opptak.']
         data = url.readlines()
         url.close()
-        if self.debug:
-            print "DEBUG: returned answer: %s" % data
+        logging.debug("record_program: returned answer: %s", data)
         if data == ['Programmet er blitt satt til opptak.']:
             return True
-        print "Failed: %s" % data
+        logging.warning("Failed recording %s: %s", id, data)
         return False
 
     def get_programs(self, days=None):
@@ -133,6 +134,7 @@ class HomebaseRecord:
         recorded or set to be recorded."""
         # TODO: not sure if this works perfectly. Maybe programs are split into
         # several pages, if there are a lot of them?
+        logging.warning('Getting already recorded programs')
         if not hasattr(self, 'already_recorded'):
             self.already_recorded = list()
         self.logon()
@@ -189,7 +191,6 @@ class HomebaseRecord:
 
 def main(args):
     # TODO: validate the config? E.g. check that the defined 'channel's exists?
-    h = HomebaseRecord()
     parser = argparse.ArgumentParser(description="Set programs/series to record at homebase.no.")
     parser.add_argument('-v', '--verbose',
                       action='store_true', dest='verbose',
@@ -198,20 +199,25 @@ def main(args):
                       help="Print debug info (internal use)")
     parser.add_argument('--days', type=float,
                         help="set the number of days to check programs")
-
+    parser.add_argument('--list-channels', action='store_true', 
+                        help="list the available channels and exit")
+    parser.add_argument('--list-programs', action='store_true', 
+                        help="list the available programs and exit")
     # TODO: add argument for setting config file
+
     # TODO: add support for "already recorded"-file, where all the programs set
     #       to be recorded are put. Those are not set to be recorded anymore.
     #       This is to avoid that programs deleted from the record list are put
     #       back in again later on.
 
-    parser.add_argument('--list-channels', action='store_true', 
-                        help="list the available channels and exit")
-    parser.add_argument('--list-programs', action='store_true', 
-                        help="list the available programs and exit")
     args = parser.parse_args()
 
-    h.debug = args.debug
+    if args.debug >= 2:
+        logging.basicConfig(level=logging.DEBUG)
+    elif args.debug >= 1:
+        logging.basicConfig(level=logging.INFO)
+
+    h = HomebaseRecord()
 
     if args.list_channels:
         h.print_channels()
