@@ -131,6 +131,8 @@ class HomebaseRecord:
     def get_record_list(self):
         """Get the list from homebase.no of the programs that is already
         recorded or set to be recorded."""
+        # TODO: not sure if this works perfectly. Maybe programs are split into
+        # several pages, if there are a lot of them?
         if not hasattr(self, 'already_recorded'):
             self.already_recorded = list()
         self.logon()
