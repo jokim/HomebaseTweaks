@@ -129,7 +129,7 @@ class HomebaseRecord:
         recorded or set to be recorded."""
         # TODO: not sure if this works perfectly. Maybe programs are split into
         # several pages, if there are a lot of them?
-        logging.warning('Getting already recorded programs')
+        logging.debug('Getting already recorded programs')
         if not hasattr(self, 'already_recorded'):
             self.already_recorded = list()
         self.logon()
