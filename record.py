@@ -23,7 +23,9 @@ support automatic recording of series. It could for instance be run in a cronjob
 every other night.
 
 Recorder settings, e.g. logon credentials and what programs to record, should be
-put in the file `config.py`.
+put in a file `config.py`. See config.example.py for the config variables.
+
+TODO: be able to specify the config file.
 """
 import sys, os, time, logging
 
@@ -199,6 +201,9 @@ class HomebaseRecord:
                                     start, end)
 
     def print_programs(self, days=None):
+        """Get all the programs from the given days and print them out."""
+        if not days:
+            days = getattr(config, 'days', 1)
         programs = self.get_programs(days=days)
         for prog in sorted(programs, key=lambda x: x['title']):
             print self.print_program(prog).encode('utf8')
