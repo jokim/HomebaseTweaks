@@ -76,24 +76,23 @@ class HomebaseRecord:
     def record_programs(self, days=None):
         """Find all the available programs and record those that match the
         selectors from config."""
-        h.get_record_list()
-        recorded = h.already_recorded
-        programs = h.get_programs(days)
-        for serie in config.series:
-            for program in programs:
+        self.get_record_list()
+        programs = self.get_programs(days)
+        for program in programs:
+            for serie in config.series:
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
-                if program['id'] in recorded:
-                    logging.info("Already recorded: %s", h.print_program(program))
-                    continue # already recorded
                 if serie['title'] == program['title']:
-                    logging.info("Recording: %s", h.print_program(program))
-                    h.record_program(program['id'])
+                    logging.info("Recording: %s", self.print_program(program))
+                    self.record_program(program['id'])
 
 
     def record_program(self, id):
         """Set a given program to be recorded."""
         self.logon()
+        if id in self.already_recorded:
+            logging.info("Already recorded: %s", id)
+            return True # already recorded
         logging.debug('Recording %s', id)
         url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php',
                               urllib.urlencode({'action': 'add', 'FR': id}))
