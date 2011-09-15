@@ -239,21 +239,7 @@ def main(args):
     if args.list_programs:
         h.print_programs(args.days)
         sys.exit()
-
-    h.get_record_list()
-    recorded = h.already_recorded
-    programs = h.get_programs(args.days)
-
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if program['id'] in recorded:
-                logging.info("Already recorded: %s", h.print_program(program))
-                continue # already recorded
-            if serie['title'] == program['title']:
-                logging.info("Recording: %s", h.print_program(program))
-                h.record_program(program['id'])
+    h.record_programs(args.days)
 
 def main_deprecated(args):
     """The deprecated version of main, if argparse can't be imported. Supports
@@ -283,20 +269,7 @@ def main_deprecated(args):
     if '--list-channels' in args:
         h.print_channels()
         sys.exit()
-
-    h.get_record_list()
-    recorded = h.already_recorded
-    programs = h.get_programs()
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if program['id'] in recorded:
-                logging.info("Already recorded: %s", h.print_program(program))
-                continue # already recorded
-            if serie['title'] == program['title']:
-                logging.info("Recording: %s", h.print_program(program))
-                h.record_program(program['id'])
+    h.record_programs()
 
 if __name__ == '__main__':
     if has_argparse:
