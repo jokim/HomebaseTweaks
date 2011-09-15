@@ -71,6 +71,24 @@ class HomebaseRecord:
             raise Exception('Could not log on (username=%s)' % config.username)
         self.loggedon = True
 
+    def record_programs(self, days=None):
+        """Find all the available programs and record those that match the
+        selectors from config."""
+        h.get_record_list()
+        recorded = h.already_recorded
+        programs = h.get_programs(days)
+        for serie in config.series:
+            for program in programs:
+                if serie.has_key('channel') and serie['channel'] != program['channel']:
+                    continue
+                if program['id'] in recorded:
+                    logging.info("Already recorded: %s", h.print_program(program))
+                    continue # already recorded
+                if serie['title'] == program['title']:
+                    logging.info("Recording: %s", h.print_program(program))
+                    h.record_program(program['id'])
+
+
     def record_program(self, id):
         """Set a given program to be recorded."""
         self.logon()
@@ -132,6 +150,8 @@ class HomebaseRecord:
         logging.debug('Getting already recorded programs')
         if not hasattr(self, 'already_recorded'):
             self.already_recorded = list()
+        if self.already_recorded:
+            return
         self.logon()
         url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
         soup = BeautifulSoup(''.join(url.readlines()))
