@@ -80,24 +80,24 @@ class HomebaseRecord:
         programs = self.get_programs(days)
         for program in programs:
             for serie in config.series:
+                if serie.has_key('title') and serie['title'] != program['title']:
+                    continue
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
                 if serie.has_key('dow') and time.strptime(program['date'],
                                               '%Y%m%d').tm_wday != serie['dow']:
                     continue
-                if serie['title'] == program['title']:
-                    logging.info("Recording: %s", self.print_program(program))
-                    self.record_program(program['id'])
+                self.record_program(program)
 
-    def record_program(self, id):
+    def record_program(self, program):
         """Set a given program to be recorded."""
         self.logon()
-        if id in self.already_recorded:
-            logging.info("Already recorded: %s", id)
-            return True # already recorded
-        logging.debug('Recording %s', id)
+        if program['id'] in self.already_recorded:
+            logging.info("Already recorded: %s", self.print_program(program))
+            return True
+        logging.info('Recording %s', self.print_program(program))
         url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php',
-                              urllib.urlencode({'action': 'add', 'FR': id}))
+                       urllib.urlencode({'action': 'add', 'FR': program['id']}))
         # Sample error messages:
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Du m\xe5 logge inn f\xf8rst.']
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Opptak p\xe5 denne kanalen krever abonnement. Du kan kj\xf8pe et PVR-produkt p\xe5 homebase.no']
@@ -110,7 +110,7 @@ class HomebaseRecord:
         logging.debug("record_program: returned answer: %s", data)
         if data == ['Programmet er blitt satt til opptak.']:
             return True
-        logging.warning("Failed recording %s: %s", id, data)
+        logging.warning("Failed recording %s: %s", program['id'], data)
         return False
 
     def get_programs(self, days=None):
