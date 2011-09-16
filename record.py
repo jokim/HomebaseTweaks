@@ -78,14 +78,17 @@ class HomebaseRecord:
         selectors from config."""
         self.get_record_list()
         programs = self.get_programs(days)
-        for program in programs:
-            for serie in config.series:
-                if serie.has_key('title') and serie['title'] != program['title']:
-                    continue
+        for serie in config.series:
+            for program in programs:
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
                 if serie.has_key('dow') and time.strptime(program['date'],
                                               '%Y%m%d').tm_wday != serie['dow']:
+                    continue
+                if serie.has_key('title') and serie['title'] != program['title']:
+                    continue
+                if (serie.has_key('title_regex') and
+                        not re.match(serie['title_regex'], program['title'])):
                     continue
                 self.record_program(program)
 
