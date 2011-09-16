@@ -82,10 +82,12 @@ class HomebaseRecord:
             for serie in config.series:
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
+                if serie.has_key('dow') and time.strptime(program['date'],
+                                              '%Y%m%d').tm_wday != serie['dow']:
+                    continue
                 if serie['title'] == program['title']:
                     logging.info("Recording: %s", self.print_program(program))
                     self.record_program(program['id'])
-
 
     def record_program(self, id):
         """Set a given program to be recorded."""
@@ -161,7 +163,9 @@ class HomebaseRecord:
             self.already_recorded.append(program['value'])
 
     def parse_id(self, tag):
-        """Parse an tag into its elements."""
+        """Parse an id tag into its elements.
+        
+        Example id: 20110629/nrktv1/20110629204500-20110629205500"""
         date, channel, time = tag.split('/')
         start, end = time.split('-')
         return {'id': tag,
