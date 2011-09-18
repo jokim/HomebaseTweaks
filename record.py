@@ -27,7 +27,7 @@ put in a file `config.py`. See config.example.py for the config variables.
 
 TODO: be able to specify the config file.
 """
-import sys, os, time, logging
+import sys, os, time, logging, re
 
 import urllib, urllib2
 from math import ceil
