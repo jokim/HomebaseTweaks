@@ -139,6 +139,14 @@ class HomebaseRecord:
             logging.debug("Getting already recorded: %s", program['value'])
             self.already_recorded.append(program['value'])
 
+    def print_record_list(self):
+        """Print the list of recorded programs, and those waiting to be
+        recorded."""
+        self.get_record_list()
+        for p in self.already_recorded:
+            print p
+            #print self.print_program(p)
+
     def parse_id(self, tag):
         """Parse an tag into its elements."""
         date, channel, time = tag.split('/')
@@ -220,6 +228,9 @@ def main(args):
         sys.exit()
     if args.list_programs:
         h.print_programs(args.days)
+        sys.exit()
+    if args.list_records:
+        h.print_record_list()
         sys.exit()
 
     h.get_record_list()
