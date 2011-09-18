@@ -197,6 +197,8 @@ def main(args):
                         help="list the available channels and exit")
     parser.add_argument('--list-programs', action='store_true', 
                         help="list the available programs and exit")
+    parser.add_argument('--list-records', action='store_true', 
+                        help="view the record list and already recorded programs")
     # TODO: add argument for setting config file
 
     # TODO: add support for "already recorded"-file, where all the programs set
