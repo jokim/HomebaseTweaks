@@ -136,6 +136,8 @@ class HomebaseRecord:
         url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
         soup = BeautifulSoup(''.join(url.readlines()))
         for program in soup.findAll('input', {'type': 'hidden', 'name': 'pid[]'}):
+            p = self.parse_id(program['value'])
+            # TODO: should get names too
             logging.debug("Getting already recorded: %s", program['value'])
             self.already_recorded.append(program['value'])
 
@@ -244,7 +246,7 @@ def main(args):
             if program['id'] in recorded:
                 logging.info("Already recorded: %s", h.print_program(program))
                 continue # already recorded
-            if serie['title'] == program['title']:
+            if serie.has_key('title') and serie['title'] == program['title']:
                 logging.info("Recording: %s", h.print_program(program))
                 h.record_program(program['id'])
 
