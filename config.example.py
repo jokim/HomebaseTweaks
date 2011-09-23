@@ -36,8 +36,18 @@ series = (
         # This records a program on the tv channel 'nrktv1':
         {'title': 'Boardwalk Empire', 'channel': 'nrktv1'},
 
+        # Selector arguments
+        # title:    [string]
+        #           The exact title of the program.
+        #
+        # channel:  [string]
+        #           The exact name of the channel the program should be going.
+        #
+        # dow:      [int]
+        #           The day of the week the program should be going before it is
+        #           recorded. Goes from 0 (sunday) to 6 (saturday).
+
         # TODO: give examples for specifying:
-        # - day of week
         # - time of day (from - to)
         # - regexp for the program name
 )

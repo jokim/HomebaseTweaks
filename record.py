@@ -23,9 +23,11 @@ support automatic recording of series. It could for instance be run in a cronjob
 every other night.
 
 Recorder settings, e.g. logon credentials and what programs to record, should be
-put in the file `config.py`.
+put in a file `config.py`. See config.example.py for the config variables.
+
+TODO: be able to specify the config file.
 """
-import sys, os, time, logging
+import sys, os, time, logging, re
 
 import urllib, urllib2
 from math import ceil
@@ -71,12 +73,34 @@ class HomebaseRecord:
             raise Exception('Could not log on (username=%s)' % config.username)
         self.loggedon = True
 
-    def record_program(self, id):
+    def record_programs(self, days=None):
+        """Find all the available programs and record those that match the
+        selectors from config."""
+        self.get_record_list()
+        programs = self.get_programs(days)
+        for serie in config.series:
+            for program in programs:
+                if serie.has_key('channel') and serie['channel'] != program['channel']:
+                    continue
+                if serie.has_key('dow') and time.strptime(program['date'],
+                                              '%Y%m%d').tm_wday != serie['dow']:
+                    continue
+                if serie.has_key('title') and serie['title'] != program['title']:
+                    continue
+                if (serie.has_key('title_regex') and
+                        not re.match(serie['title_regex'], program['title'])):
+                    continue
+                self.record_program(program)
+
+    def record_program(self, program):
         """Set a given program to be recorded."""
         self.logon()
-        logging.debug('Recording %s', id)
+        if program['id'] in self.already_recorded:
+            logging.info("Already recorded: %s", self.print_program(program))
+            return True
+        logging.info('Recording %s', self.print_program(program))
         url = urllib2.urlopen('https://min.homebase.no/epg/lib/addRecording.php',
-                              urllib.urlencode({'action': 'add', 'FR': id}))
+                       urllib.urlencode({'action': 'add', 'FR': program['id']}))
         # Sample error messages:
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Du m\xe5 logge inn f\xf8rst.']
         # ['<br/>Caught by sanitizeInput: Array\n', '(\n', '    [0] => Array\n', '        (\n', '        )\n', '\n', ')\n', '<br/>\n', '\n', 'Opptak p\xe5 denne kanalen krever abonnement. Du kan kj\xf8pe et PVR-produkt p\xe5 homebase.no']
@@ -89,7 +113,7 @@ class HomebaseRecord:
         logging.debug("record_program: returned answer: %s", data)
         if data == ['Programmet er blitt satt til opptak.']:
             return True
-        logging.warning("Failed recording %s: %s", id, data)
+        logging.warning("Failed recording %s: %s", program['id'], data)
         return False
 
     def get_programs(self, days=None):
@@ -132,6 +156,8 @@ class HomebaseRecord:
         logging.debug('Getting already recorded programs')
         if not hasattr(self, 'already_recorded'):
             self.already_recorded = list()
+        if self.already_recorded:
+            return
         self.logon()
         url = urllib2.urlopen('https://min.homebase.no/index.php?page=storage')
         soup = BeautifulSoup(''.join(url.readlines()))
@@ -150,7 +176,9 @@ class HomebaseRecord:
             #print self.print_program(p)
 
     def parse_id(self, tag):
-        """Parse an tag into its elements."""
+        """Parse an id tag into its elements.
+        
+        Example id: 20110629/nrktv1/20110629204500-20110629205500"""
         date, channel, time = tag.split('/')
         start, end = time.split('-')
         # TODO: make use of time format for date, time, start and end
@@ -190,6 +218,9 @@ class HomebaseRecord:
                                     start, end)
 
     def print_programs(self, days=None):
+        """Get all the programs from the given days and print them out."""
+        if not days:
+            days = getattr(config, 'days', 1)
         programs = self.get_programs(days=days)
         for prog in sorted(programs, key=lambda x: x['title']):
             print self.print_program(prog).encode('utf8')
@@ -235,21 +266,7 @@ def main(args):
     if args.list_records:
         h.print_record_list()
         sys.exit()
-
-    h.get_record_list()
-    recorded = h.already_recorded
-    programs = h.get_programs(args.days)
-
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if program['id'] in recorded:
-                logging.info("Already recorded: %s", h.print_program(program))
-                continue # already recorded
-            if serie.has_key('title') and serie['title'] == program['title']:
-                logging.info("Recording: %s", h.print_program(program))
-                h.record_program(program['id'])
+    h.record_programs(args.days)
 
 def main_deprecated(args):
     """The deprecated version of main, if argparse can't be imported. Supports
@@ -279,20 +296,7 @@ def main_deprecated(args):
     if '--list-channels' in args:
         h.print_channels()
         sys.exit()
-
-    h.get_record_list()
-    recorded = h.already_recorded
-    programs = h.get_programs()
-    for serie in config.series:
-        for program in programs:
-            if serie.has_key('channel') and serie['channel'] != program['channel']:
-                continue
-            if program['id'] in recorded:
-                logging.info("Already recorded: %s", h.print_program(program))
-                continue # already recorded
-            if serie['title'] == program['title']:
-                logging.info("Recording: %s", h.print_program(program))
-                h.record_program(program['id'])
+    h.record_programs()
 
 if __name__ == '__main__':
     if has_argparse:
