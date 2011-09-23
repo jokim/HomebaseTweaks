@@ -79,7 +79,7 @@ class HomebaseRecord:
         self.get_record_list()
         programs = self.get_programs(days)
         for serie in config.series:
-            for program in programs:
+            for program in sorted(programs, key=lambda x: x['time']):
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
                 if serie.has_key('dow') and time.strptime(program['date'],
