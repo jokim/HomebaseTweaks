@@ -222,7 +222,7 @@ class HomebaseRecord:
         if not days:
             days = getattr(config, 'days', 1)
         programs = self.get_programs(days=days)
-        for prog in sorted(programs, key=lambda x: x['title']):
+        for prog in sorted(programs, key=lambda x: x['time']):
             print self.print_program(prog).encode('utf8')
 
 def main(args):
