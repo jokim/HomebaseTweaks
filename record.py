@@ -153,6 +153,7 @@ class HomebaseRecord:
         """Parse an tag into its elements."""
         date, channel, time = tag.split('/')
         start, end = time.split('-')
+        # TODO: make use of time format for date, time, start and end
         return {'id': tag,
                 'date': date,
                 'channel': channel, 
