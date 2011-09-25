@@ -78,8 +78,8 @@ class HomebaseRecord:
         selectors from config."""
         self.get_record_list()
         programs = self.get_programs(days)
-        for serie in config.series:
-            for program in sorted(programs, key=lambda x: x['time']):
+        for program in sorted(programs, key=lambda x: x['time']):
+            for serie in config.series:
                 if serie.has_key('channel') and serie['channel'] != program['channel']:
                     continue
                 if serie.has_key('dow') and time.strptime(program['date'],
