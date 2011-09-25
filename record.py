@@ -143,7 +143,8 @@ class HomebaseRecord:
                 # e.g: 20110629/nrktv1/20110629204500-20110629205500
                 meta = self.parse_id(unicode(prog.span.span.a['href']))
                 meta['title'] = unicode(prog.span.span.a.string)
-                ret.append(meta)
+                if meta not in ret:
+                    ret.append(meta)
             for a in soup.findAll('a', {'class': 'nextDay'}):
                 target = a['href'].split('?')[1] # = ts2=XXXXXX
         return tuple(ret)
